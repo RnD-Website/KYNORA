@@ -1,0 +1,60 @@
+---
+// SCROLL TEXT — brown panel whose statement lights up char by char on scroll,
+// then lifts away to reveal a sticky full-bleed photo underneath.
+import Label from '../ui/Label.astro';
+import Button from '../ui/Button.astro';
+import { scrollText } from '../../data/content';
+
+const words = scrollText.text.split(' ');
+---
+<c-scroll-text class="block relative w-full z-1">
+  <div class="scroll-text-wrapper relative grid-w w-full content-center min-h-screen-mobile xl:min-h-screen bg-brown py-120 md:py-200 overflow-hidden z-1">
+    <div class="col-span-full md:col-start-2 md:col-end-12 xl:col-start-4 xl:col-end-10 flex flex-col items-center">
+      <div class="mb-30 md:mb-40">
+        <Label text={scrollText.label} class="border-cream text-cream" />
+      </div>
+      <div class="statement-text heading relative text-center -mx-10">
+        <div class="scroll-text-placeholder absolute top-0 left-0 w-full text-brown-deep" aria-hidden="true">
+          {words.map((w, i) => (
+            <>
+              <span class="word">{[...w].map((c) => <span class="char">{c}</span>)}</span>{i < words.length - 1 && ' '}
+            </>
+          ))}
+        </div>
+        <div class="scroll-text-content relative text-cream">
+          {words.map((w, i) => (
+            <>
+              <span class="word" aria-hidden="true">{[...w].map((c) => <span class="char">{c}</span>)}</span>{i < words.length - 1 && ' '}
+            </>
+          ))}
+          <span class="sr-only">{scrollText.text}</span>
+        </div>
+      </div>
+      <div class="mt-30 md:mt-40">
+        <Button href={scrollText.button.href} label={scrollText.button.label} border="border-cream text-cream" panel="bg-cream text-brown" filled />
+      </div>
+    </div>
+  </div>
+
+  <!-- Full-width looping video at its own 16:9 shape (nothing cropped).
+       Muted + playsinline so it autoplays on every device; the poster shows while it loads. -->
+  <div class="scroll-text-image relative w-full overflow-hidden" style="aspect-ratio: 16 / 9;">
+    <div class="scroll-text-image-inner absolute inset-0">
+      <video
+        class="w-full h-full object-cover"
+        src={scrollText.video.src}
+        poster={scrollText.video.poster}
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="metadata"
+        aria-label={scrollText.video.alt}
+      ></video>
+    </div>
+  </div>
+</c-scroll-text>
+
+<script>
+  import '../../elements/scroll-text';
+</script>

@@ -1,0 +1,22 @@
+---
+// Homepage — section order matches the reference 1:1:
+// Hero → Scroll text → Beliefs (intro + 3 trail sections) → Ambassadors globe → Quiz promo → Footer
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/sections/hero/Hero.astro';
+import ScrollText from '../components/sections/ScrollText.astro';
+import Beliefs from '../components/sections/beliefs/Beliefs.astro';
+import Ambassadors from '../components/sections/Ambassadors.astro';
+import ProductFinderPromo from '../components/sections/ProductFinderPromo.astro';
+import Footer from '../components/layout/Footer.astro';
+---
+<BaseLayout
+  title="KYNORA | Home"
+  description="KYNORA women’s wellness — creatine, protein, collagen and daily vitamins. Power your everyday."
+>
+  <Hero />
+  <ScrollText />
+  <Beliefs />
+  <Ambassadors />
+  <ProductFinderPromo />
+  <Footer slot="footer" />
+</BaseLayout>

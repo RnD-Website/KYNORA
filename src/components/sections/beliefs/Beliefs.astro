@@ -1,0 +1,26 @@
+---
+// BELIEFS — intro block followed by three trail sections
+import Label from '../../ui/Label.astro';
+import SplitTitle from '../../ui/SplitTitle.astro';
+import BeliefSection from './BeliefSection.astro';
+import { beliefs } from '../../../data/content';
+---
+<section class="beliefs block bg-brown">
+  <div class="beliefs-intro relative flex items-center w-full pt-120 pb-200 md:pt-200 md:pb-300 xl:pb-200 z-1 max-xl:overflow-hidden">
+    <div class="content content-medium grid-w w-full text-cream">
+      <div class="col-span-full md:col-start-3 md:col-end-11 xl:col-start-4 xl:col-end-10 flex flex-col items-center max-md:px-margin">
+        <div class="mb-30 md:mb-40"><Label text={beliefs.label} class="border-cream text-cream" /></div>
+        <SplitTitle lines={beliefs.title} class="text-center -mx-gutter" tag="h2" manual />
+        <p class="body-s text-center mt-30 md:mt-40 max-w-[60rem]" data-reveal="copy">{beliefs.copy}</p>
+      </div>
+    </div>
+  </div>
+
+  {beliefs.sections.map((s, i) => (
+    <BeliefSection index={i} {...(s as any)} />
+  ))}
+</section>
+
+<script>
+  import '../../../elements/beliefs';
+</script>

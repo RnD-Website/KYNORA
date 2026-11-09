@@ -1,0 +1,123 @@
+---
+// Procedural wild grass (original artwork), generated at build time with a
+// seeded RNG so markup is stable. Each blade is a tapered, curved shape with a
+// vertical gradient (shadowed base → sunlit tip) and a highlight rib; some carry
+// seed heads. Clumps hug the screen edges and GSAP sways them from the base.
+interface Props {
+  side: 'left' | 'right' | 'full';
+  seed: number;
+  clumps: number;
+  height: number; // max blade height in viewBox units (viewBox 1600x1000)
+  spread: number; // how far clumps reach in from the edge
+  tone: 'near' | 'far' | 'front';
+  class?: string;
+}
+const { side, seed, clumps, height, spread, tone, class: cls = '' } = Astro.props;
+
+let s = seed;
+const rand = () => ((s = (s * 16807) % 2147483647) / 2147483647);
+const range = (a: number, b: number) => a + rand() * (b - a);
+
+// [base, mid, tip] gradient stops per tone
+const palettes: Record<string, [string, string, string][]> = {
+  near: [
+    ['#4A4320', '#9C8A34', '#F1D27A'],
+    ['#3C3A1E', '#7E7A33', '#D9C46A'],
+    ['#5B4A22', '#B8913A', '#F6DC8E'],
+    ['#2F3A1E', '#6E7B35', '#C9C46E'],
+  ],
+  front: [
+    ['#3A3418', '#857330', '#E3C26A'],
+    ['#2C2F18', '#5F6A2C', '#B9B25E'],
+  ],
+  far: [
+    ['#B89A63', '#D7BC84', '#F1DDB0'],
+    ['#A99062', '#CDB485', '#EBD6AA'],
+  ],
+};
+const pal = palettes[tone];
+const uid = `g${seed}`;
+
+type Blade = { d: string; rib: string; grad: number; seeds?: { x: number; y: number; r: number; a: number }[] };
+type Clump = { x: number; blades: Blade[] };
+const out: Clump[] = [];
+const edge = side === 'left' ? 0 : 1600;
+
+for (let c = 0; c < clumps; c++) {
+  // 'full' spreads a low turf row evenly across the width; edges bias outward
+  const reach = side === 'full' ? 0 : Math.pow(rand(), 1.6) * spread;
+  const base = side === 'full' ? ((c + rand()) / clumps) * 1700 - 50 : side === 'left' ? reach : 1600 - reach;
+  const falloff = side === 'full' ? 1 : 1 - (reach / spread) * 0.55;
+  const blades: Blade[] = [];
+  const n = tone === 'front' ? 5 : side === 'full' ? 14 : 11;
+  for (let i = 0; i < n; i++) {
+    const x = base + range(-26, 26);
+    const h = height * range(0.45, 1) * falloff;
+    // lean outward from the clump centre, plus a slight lean toward page centre
+    const lean = (x - base) * range(1.2, 3.2) + (side === 'full' ? range(-0.3, 0.3) : side === 'left' ? 1 : -1) * h * range(0.05, 0.35);
+    const w = tone === 'far' ? range(2, 4) : tone === 'front' ? range(7, 12) : range(3.5, 7);
+    const tipX = x + lean;
+    const tipY = 1000 - h;
+    // bend: control point sits low and partway along the lean, so blades arc
+    const c1x = x + lean * 0.12;
+    const c1y = 1000 - h * 0.55;
+    const c2x = x + lean * 0.62;
+    const c2y = 1000 - h * 0.92;
+    const f = (n: number) => n.toFixed(1);
+    const d =
+      `M${f(x - w)} 1000 C${f(c1x - w * 0.8)} ${f(c1y)} ${f(c2x - w * 0.25)} ${f(c2y)} ${f(tipX)} ${f(tipY)} ` +
+      `C${f(c2x + w * 0.25)} ${f(c2y + 4)} ${f(c1x + w * 0.8)} ${f(c1y)} ${f(x + w)} 1000Z`;
+    const rib = `M${f(x)} 1000 C${f(c1x)} ${f(c1y)} ${f(c2x)} ${f(c2y)} ${f(tipX)} ${f(tipY)}`;
+    const blade: Blade = { d, rib, grad: Math.floor(rand() * pal.length) };
+    // seed heads on some taller blades (oat-like spikelets near the tip)
+    if (tone !== 'front' && h > height * 0.7 && rand() < 0.22) {
+      const seeds = [];
+      const count = 6 + Math.floor(rand() * 6);
+      for (let k = 0; k < count; k++) {
+        const t = 0.82 + (k / count) * 0.18;
+        // point on the rib curve at t
+        const mt = 1 - t;
+        const px = mt ** 3 * x + 3 * mt * mt * t * c1x + 3 * mt * t * t * c2x + t ** 3 * tipX;
+        const py = mt ** 3 * 1000 + 3 * mt * mt * t * c1y + 3 * mt * t * t * c2y + t ** 3 * tipY;
+        seeds.push({ x: px + (k % 2 ? 6 : -6), y: py, r: range(3, 5.5), a: (k % 2 ? 1 : -1) * range(20, 45) });
+      }
+      blade.seeds = seeds;
+    }
+    blades.push(blade);
+  }
+  out.push({ x: base, blades });
+}
+---
+<svg class:list={['grass', `grass-${tone}`, cls]} viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+  <defs>
+    {pal.map(([b, m, t], i) => (
+      <linearGradient id={`${uid}-${i}`} x1="0" y1="1" x2="0" y2="0">
+        <stop offset="0" stop-color={b} />
+        <stop offset=".55" stop-color={m} />
+        <stop offset="1" stop-color={t} />
+      </linearGradient>
+    ))}
+  </defs>
+  {out.map((c) => (
+    <g class="grass-clump" data-x={c.x.toFixed(0)}>
+      {c.blades.map((b) => (
+        <g>
+          <path d={b.d} fill={`url(#${uid}-${b.grad})`} />
+          {tone !== 'far' && <path d={b.rib} fill="none" stroke="#FFF3C9" stroke-width={tone === 'front' ? 1.4 : 0.8} opacity=".28" />}
+          {b.seeds?.map((sd) => (
+            <ellipse cx={sd.x.toFixed(1)} cy={sd.y.toFixed(1)} rx={(sd.r * 0.45).toFixed(1)} ry={sd.r.toFixed(1)} transform={`rotate(${sd.a.toFixed(0)} ${sd.x.toFixed(1)} ${sd.y.toFixed(1)})`} fill={pal[b.grad][2]} opacity=".9" />
+          ))}
+        </g>
+      ))}
+    </g>
+  ))}
+</svg>
+
+<style>
+  /* Extends below the scene's bottom edge (clipped by the hero), so blade
+     bases and the soft blur edge are never visible and swaying never opens gaps. */
+  .grass { position: absolute; left: 0; top: 0; width: 100%; height: 108%; overflow: visible; }
+  /* depth of field: far grass soft, front-most blades out of focus */
+  .grass-far { filter: blur(1.2px); opacity: 0.85; }
+  .grass-front { filter: blur(3px); }
+</style>

@@ -1,0 +1,170 @@
+@import '@fontsource-variable/figtree';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ------------------------------------------------------------------
+   Root scale — fluid rem identical to the reference build
+   mobile: 375px design  -> 1rem = 10px @375
+   tablet: 768px design  -> 1rem = 10px @768
+   desktop: 1600px design -> 1rem = 9px  @1440
+------------------------------------------------------------------- */
+:root {
+  --margin: 2rem;
+  --gutter: 1rem;
+  /* Size multiplier for big titles (1 = reference sizes for League Gothic). */
+  --face-scale: 1;
+  --header-height: 6.5rem;
+  --vh: calc(var(--vh-initial, 1vh) * 100);
+  --column: calc((100vw - var(--margin) * 2) / 12);
+
+  /* KYNORA palette as RGB triplets (Tailwind reads them with alpha support).
+     The DialKit "Global" panel rewrites these live. */
+  --rgb-orange: 230 106 50;   /* #E66A32 */
+  --rgb-cream: 244 233 217;   /* #F4E9D9 */
+  --rgb-beige: 181 138 108;   /* #B58A6C */
+  --rgb-brown: 122 61 34;     /* #7A3D22 warm chestnut */
+  --rgb-ink: 23 21 21;        /* #171515 */
+  --rgb-white: 255 255 255;   /* #FFFFFF */
+  --rgb-brown-deep: 94 44 22; /* #5E2C16 */
+}
+
+html {
+  font-size: calc(100vw / 37.5);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+@media (min-width: 768px) {
+  html { font-size: calc(100vw / 76.8); }
+}
+@media (min-width: 1200px) {
+  html { font-size: calc(100vw / 160); }
+  :root { --margin: 2rem; }
+}
+
+body {
+  @apply bg-brown text-ink font-body;
+  font-size: max(1.5rem, 15px);
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  overflow-x: hidden;
+}
+
+/* Lenis */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+img, video, svg { display: block; }
+a { color: inherit; text-decoration: none; }
+
+@layer components {
+  /* Grid */
+  .grid-w { @apply grid grid-cols-6 md:grid-cols-12 gap-x-gutter px-margin; }
+
+  /* Typography — same hierarchy & ratios as reference */
+  .heading { font-family: theme('fontFamily.heading'); text-transform: uppercase; font-weight: 400; }
+
+  .heading-h1 { @apply heading; font-size: 26rem; line-height: 0.8; letter-spacing: -0.01em; }
+  .heading-h1-mobile { @apply heading; font-size: 8.8rem; line-height: 0.8; letter-spacing: -0.01em; }
+  .heading-h2 { @apply heading; font-size: 20rem; line-height: 0.8; letter-spacing: -0.01em; }
+  .heading-h2-mobile { @apply heading; font-size: 5rem; line-height: 0.81; letter-spacing: -0.01em; }
+  .heading-h3 { @apply heading; font-size: 10.8rem; line-height: 0.81; letter-spacing: -0.01em; }
+  .heading-h4 { @apply heading; font-size: 8.8rem; line-height: 0.82; letter-spacing: -0.01em; }
+  .heading-h5-mobile { @apply heading; font-size: 4.4rem; line-height: 0.88; letter-spacing: -0.01em; }
+  .heading-h6 { @apply heading; font-size: 3.4rem; line-height: 0.94; letter-spacing: 0.01em; }
+  .heading-h7 { @apply heading; font-size: 2.4rem; line-height: 1; letter-spacing: 0.01em; }
+  .heading-h8 { @apply heading; font-size: 2rem; line-height: 1.2; letter-spacing: 0.01em; }
+
+  .body-label { @apply heading; font-size: 1.4rem; line-height: 1; letter-spacing: 0.02em; }
+  .body-s { font-size: max(1.5rem, 15px); line-height: 1.6; letter-spacing: -0.01em; }
+  .body-l { font-size: max(1.7rem, 15px); line-height: 1.9; letter-spacing: -0.01em; }
+
+  /* Content title sizes (content-large / medium / small) */
+  /* Each title size is a --fs token multiplied by --title-scale,
+     which the DialKit section panels set per section. */
+  .content-title { @apply heading; font-size: calc(var(--fs) * var(--title-scale, 1) * var(--face-scale)); line-height: 0.8; letter-spacing: -0.01em; }
+  .content-large .content-title { --fs: 8.8rem; }
+  .content-medium .content-title { --fs: 7.2rem; }
+  .content-small .content-title { --fs: 4.4rem; line-height: 0.88; }
+  .belief-title { --fs: 5rem; line-height: 0.81; }
+  @media (min-width: 768px) {
+    .content-large .content-title { --fs: 16rem; }
+    .content-medium .content-title { --fs: 14rem; }
+    .content-small .content-title { --fs: 8.8rem; line-height: 0.82; }
+    .belief-title { --fs: 8.8rem; line-height: 0.8; }
+  }
+  @media (min-width: 1200px) {
+    .content-large .content-title { --fs: 26rem; }
+    .content-medium .content-title { --fs: 20rem; }
+    .belief-title { --fs: 10.8rem; line-height: 0.81; }
+  }
+  .belief-title.content-title { text-align: left; }
+
+  /* Belief photo size (scaled by the Beliefs panel) */
+  .belief-size { width: calc(20rem * var(--belief-img-scale, 1)); height: calc(20rem * var(--belief-img-scale, 1)); }
+  @media (min-width: 768px) {
+    .belief-size { width: calc(36.2rem * var(--belief-img-scale, 1)); height: calc(36.2rem * var(--belief-img-scale, 1)); }
+  }
+
+  /* Statement size (Statement panel) */
+  .statement-text { font-size: calc(5rem * var(--statement-scale, 1) * var(--face-scale)); line-height: 0.81; }
+  @media (min-width: 768px) { .statement-text { font-size: calc(10.8rem * var(--statement-scale, 1) * var(--face-scale)); } }
+
+  .absolute-full { @apply absolute top-0 left-0 w-full h-full; }
+  .absolute-center { @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2; }
+  .flex-center { @apply flex items-center justify-center; }
+  .cover { @apply w-full h-full object-cover; }
+
+  /* Split text — masks for line / word / char reveals */
+  .line { display: block; overflow: hidden; padding-bottom: 0.06em; margin-bottom: -0.06em; }
+  .word { display: inline-block; white-space: nowrap; }
+  .char { display: inline-block; will-change: transform; }
+
+  /* Label pill */
+  .label { @apply inline-block body-label border px-11 py-8 select-none; }
+  .label .word { overflow: hidden; vertical-align: top; }
+  .label .word-inner { display: inline-block; }
+
+  /* Button with sliding panel (reference behaviour) */
+  .button { @apply relative inline-flex justify-center heading-h8 py-20 px-40 border select-none overflow-hidden; }
+  .button-panel { @apply absolute -inset-px pointer-events-none overflow-hidden; transform: translateY(101%); transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+  .button-panel-inner { @apply absolute-full flex justify-center items-center heading-h8 whitespace-nowrap; transform: translateY(-101%); transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+  @media (hover: hover) {
+    .button:hover .button-panel, .button:hover .button-panel-inner { transform: translateY(0); }
+  }
+  .button.is-filled .button-panel { transform: none; }
+  .button.is-filled .button-panel-inner { transform: none; }
+  .button.is-filled:hover .button-panel { transform: translateY(-101%); }
+  .button.is-filled:hover .button-panel-inner { transform: translateY(101%); }
+}
+
+/* Globe markers */
+.globe-marker { opacity: 0; transition: opacity 0.5s ease; will-change: transform; }
+.globe-marker.is-in { opacity: 1; }
+.globe-marker.is-in.is-hidden { opacity: 0; pointer-events: none; }
+.globe-marker-dot { transform: scale(0); transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.globe-marker.is-in .globe-marker-dot { transform: scale(1); }
+.globe-marker-modal { clip-path: inset(100% 0 0 0); transition: clip-path 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+.globe-marker:hover .globe-marker-modal, .globe-marker:focus-visible .globe-marker-modal { clip-path: inset(0 0 0 0); }
+.globe-marker-dashes { animation: dash-spin 8s linear infinite; }
+@keyframes dash-spin { from { transform: translate(-50%, -50%) rotate(-90deg); } to { transform: translate(-50%, -50%) rotate(270deg); } }
+
+/* Kinetic arched titles (lib/kinetic.ts) */
+.kinetic .line { overflow: visible; padding-bottom: 0; margin-bottom: 0; }
+.kinetic .clip { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.08em; margin-bottom: -0.08em; will-change: transform; }
+
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+/* Orientation lock (same as reference) */
+.orientation-lock { display: none; }
+@media (orientation: landscape) and (max-width: 1023px) and (pointer: coarse) {
+  .orientation-lock { display: flex; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

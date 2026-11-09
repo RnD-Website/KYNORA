@@ -1,0 +1,19 @@
+---
+// Outline button whose filled panel slides in on hover (reference: c-button).
+// `filled` starts filled and slides the panel out on hover instead.
+interface Props {
+  href: string;
+  label: string;
+  border: string; // border + text colour classes, e.g. "border-cream text-cream"
+  panel: string; // panel classes, e.g. "bg-cream text-brown"
+  filled?: boolean;
+  class?: string;
+}
+const { href, label, border, panel, filled = false, class: cls = '' } = Astro.props;
+---
+<a href={href} class:list={['button', border, filled && 'is-filled', cls]}>
+  <span class="button-panel">
+    <span class:list={['button-panel-inner', panel]}>{label}</span>
+  </span>
+  <span class="inline-block whitespace-nowrap">{label}</span>
+</a>

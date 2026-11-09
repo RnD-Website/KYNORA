@@ -1,0 +1,42 @@
+---
+// Circular hotspot + arrow label pinned to a product (reference: packaging-button)
+interface Props {
+  side: 'left' | 'right';
+  label: string;
+  href: string;
+  icon: 'bolt' | 'leaf';
+  class?: string;
+}
+import Icon from '../../ui/Icon.astro';
+const { side, label, href, icon, class: cls = '' } = Astro.props;
+const isLeft = side === 'left';
+---
+<a href={href} class:list={['hotspot group absolute', `hotspot-${side}`, cls]}>
+  <div class="hotspot-icon relative w-48 h-48 flex-center bg-orange text-white rounded-full">
+    <Icon name={icon} class="h-16 w-auto" />
+    <svg class="hotspot-dashes absolute-center w-60 h-60 -rotate-90 pointer-events-none overflow-visible" viewBox="0 0 60 60" aria-hidden="true">
+      <circle cx="30" cy="30" r="29" fill="none" stroke="currentColor" class="text-orange" stroke-width="1" stroke-dasharray="3 3" pathLength="100" />
+    </svg>
+  </div>
+  <div
+    class:list={[
+      'hotspot-label absolute top-1/2 -translate-y-1/2 whitespace-nowrap overflow-hidden',
+      isLeft ? 'max-xl:left-[calc(100%+0.8rem)] xl:right-[calc(100%+0.8rem)]' : 'max-xl:right-[calc(100%+0.8rem)] xl:left-[calc(100%+0.8rem)]',
+    ]}
+  >
+    <div
+      class:list={[
+        'hotspot-label-inner flex transition-transform duration-smooth ease-out',
+        isLeft ? 'max-xl:flex-row-reverse xl:group-hover:-translate-x-[0.6rem]' : 'max-xl:flex-row-reverse xl:group-hover:translate-x-[0.6rem]',
+      ]}
+    >
+      {!isLeft && (
+        <svg class="hotspot-arrow h-56 w-auto text-orange max-xl:rotate-180" viewBox="0 0 27 56" aria-hidden="true"><path d="M27 0v56L0 28Z" fill="currentColor" /></svg>
+      )}
+      <span class="relative heading-h8 py-16 px-20 bg-orange text-white">{label}</span>
+      {isLeft && (
+        <svg class="hotspot-arrow h-56 w-auto text-orange max-xl:rotate-180" viewBox="0 0 27 56" aria-hidden="true"><path d="M0 0v56l27-28Z" fill="currentColor" /></svg>
+      )}
+    </div>
+  </div>
+</a>

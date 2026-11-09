@@ -1,0 +1,27 @@
+---
+// Title split into line masks > words > chars, pre-rendered at build time
+// so the char reveal works without a layout jump (reference: c-title).
+interface Props {
+  lines: string[];
+  class?: string;
+  manual?: boolean;
+  tag?: 'div' | 'h1' | 'h2' | 'h3';
+}
+const { lines, class: cls = '', manual = false, tag: Tag = 'div' } = Astro.props;
+---
+<Tag
+  class:list={['content-title', cls]}
+  data-reveal="title"
+  data-reveal-manual={manual ? '' : undefined}
+>
+  {lines.map((line) => (
+    <span class="line" aria-hidden="true">
+      {line.split(' ').map((word, wi, arr) => (
+        <>
+          <span class="word">{[...word].map((c) => <span class="char">{c}</span>)}</span>{wi < arr.length - 1 && ' '}
+        </>
+      ))}
+    </span>
+  ))}
+  <span class="sr-only">{lines.join(' ')}</span>
+</Tag>

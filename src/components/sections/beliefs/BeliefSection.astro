@@ -1,0 +1,89 @@
+---
+// One belief panel: trail line (dashed + drawn solid), numbered marker that
+// rides the line, tilted square photo, sticky title, bottom-right copy.
+import Icon from '../../ui/Icon.astro';
+import SplitTitle from '../../ui/SplitTitle.astro';
+import { trails } from './trails';
+
+interface Props {
+  index: number;
+  number: number;
+  title: string[];
+  heading: string;
+  body: string;
+  image: { src: string; alt: string };
+  theme: 'brown' | 'cream' | 'orange';
+}
+const { index, number, title, heading, body, image, theme } = Astro.props;
+
+const themes = {
+  brown: { section: 'bg-brown text-cream', dash: 'text-cream', solid: 'text-orange', dot: 'bg-orange text-cream' },
+  cream: { section: 'bg-cream text-ink', dash: 'text-ink', solid: 'text-orange', dot: 'bg-orange text-cream' },
+  orange: { section: 'bg-orange text-cream', dash: 'text-cream', solid: 'text-cream', dot: 'bg-cream text-orange' },
+} as const;
+const t = themes[theme];
+const isFirst = index === 0;
+const isLast = theme === 'orange';
+const tilt = [-4, 5, 6][index] ?? 0;
+---
+<c-belief-section
+  class:list={[
+    'belief-section relative w-full flex',
+    t.section,
+    isFirst && 'items-end -mt-[15vh] min-h-[calc(var(--vh)+15vh)] xl:min-h-[calc(100vh+15vh)]',
+    !isFirst && !isLast && 'items-end min-h-screen-mobile xl:min-h-screen',
+    isLast && 'h-[calc(var(--vh)*2)] xl:h-[200vh]',
+  ]}
+  data-last={isLast ? '' : undefined}
+  data-tilt={tilt}
+  data-index={index}
+  style={`z-index:${index + 1}`}
+>
+  {isFirst && (
+    <div class="absolute left-1/2 top-0 -translate-x-1/2 w-48 h-48 md:w-64 md:h-64 z-2">
+      <div class="belief-arrow w-full h-full flex-center rounded-full bg-orange text-cream opacity-0">
+        <Icon name="arrow-down" class="w-16 md:w-24" />
+      </div>
+    </div>
+  )}
+
+  <div class:list={['belief-stage', isLast ? 'sticky top-0 w-full h-screen-mobile xl:h-screen overflow-hidden' : 'absolute-full']}>
+    <div class="belief-mask absolute-full overflow-hidden">
+      <svg class="belief-trail absolute-full overflow-visible" viewBox="0 0 1600 1000" preserveAspectRatio="none" aria-hidden="true">
+        <path class:list={['belief-path-dash', t.dash]} d={trails[index]} fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 6" vector-effect="non-scaling-stroke" opacity=".55" />
+        <path class:list={['belief-path-solid', t.solid]} d={trails[index]} fill="none" stroke="currentColor" stroke-width="2" vector-effect="non-scaling-stroke" />
+      </svg>
+      <div class:list={['belief-number absolute top-0 left-0 w-22 h-22 -ml-11 -mt-11 rounded-full z-1 scale-0', t.dot]}>
+        <div class="body-label absolute-center leading-none">{number}</div>
+      </div>
+    </div>
+
+    {isLast ? (
+      <div class="belief-image-rotate absolute-center z-[4] belief-size">
+        <div class="belief-image w-full h-full overflow-hidden">
+          <img src={image.src} alt={image.alt} class="cover object-[50%_35%]" loading="lazy" />
+        </div>
+      </div>
+    ) : (
+      <div class="belief-image absolute-center belief-size overflow-hidden">
+        <div class="belief-image-prlx absolute left-0 top-[-10%] w-full h-[120%]">
+          <img src={image.src} alt={image.alt} class="cover" loading="lazy" />
+        </div>
+      </div>
+    )}
+
+    <div class:list={['relative flex flex-col justify-end w-full h-screen-mobile xl:h-screen', isLast ? 'z-1' : 'z-3']}>
+      <div class="absolute top-0 left-0 w-full h-full md:h-[200%] pt-margin px-margin pointer-events-none">
+        <div class="md:sticky md:top-margin grid grid-cols-6 md:grid-cols-12 gap-x-gutter">
+          <SplitTitle lines={title} tag="h3" class="belief-title col-span-6 xl:col-span-4" manual />
+        </div>
+      </div>
+      <div class="belief-content grid-w w-full pb-margin md:pb-40">
+        <div class="col-span-5 md:col-start-8 xl:col-start-10 md:col-end-13 md:mr-margin">
+          <div class="belief-heading heading-h7" data-reveal="fade">{heading}</div>
+          <p class="belief-body body-s mt-20" data-reveal="copy">{body}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</c-belief-section>

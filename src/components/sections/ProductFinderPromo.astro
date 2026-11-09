@@ -1,0 +1,63 @@
+---
+// QUIZ PROMO — brown band, centred CTA, two products rising from the bottom edge
+import Label from '../ui/Label.astro';
+import SplitTitle from '../ui/SplitTitle.astro';
+import Button from '../ui/Button.astro';
+import { promo } from '../../data/content';
+---
+<c-product-finder-promo class="product-finder-promo block relative pt-80 text-cream overflow-hidden z-1 bg-brown">
+  <div class="content content-small grid-w w-full text-cream">
+    <div class="col-span-full md:col-start-3 md:col-end-11 xl:col-start-4 xl:col-end-10 flex flex-col items-center max-md:px-margin">
+      <div class="mb-30 md:mb-40"><Label text={promo.label} class="border-cream text-cream" /></div>
+      <SplitTitle lines={[promo.title]} class="text-center -mx-gutter" tag="h2" manual />
+      <p class="body-s text-center mt-30 md:mt-40 max-w-[50rem]" data-reveal="copy">{promo.copy}</p>
+      <div class="mt-30 md:mt-40" data-reveal="fade">
+        <Button href={promo.button.href} label={promo.button.label} border="border-cream text-cream" panel="bg-cream text-brown" filled />
+      </div>
+    </div>
+  </div>
+  <div class="grid-w mt-80">
+    <div class="col-span-full md:col-start-4 md:col-end-10 xl:col-start-5 xl:col-end-9">
+      <div class="promo-images relative w-full h-0 pt-[50%] overflow-hidden">
+        <div class="promo-left absolute top-30 left-40 w-[16rem] md:w-[26.7rem] z-1">
+          <img src={promo.left} alt="KYNORA creatine tub" class="w-full h-auto" loading="lazy" />
+        </div>
+        <div class="promo-right absolute -top-40 right-40 w-[16rem] md:w-[26.7rem]">
+          <img src={promo.right} alt="KYNORA product family tub" class="w-full h-auto" loading="lazy" />
+        </div>
+      </div>
+    </div>
+  </div>
+</c-product-finder-promo>
+
+<script>
+  import { gsap } from '../../lib/scroll';
+  import { kineticTitle } from '../../lib/kinetic';
+  import { onTune, changed, setLabel, setTitle, setText, setButton, setVar } from '../../lib/tune';
+
+  class Promo extends HTMLElement {
+    connectedCallback() {
+      const promoTitle = this.querySelector<HTMLElement>('.content-title');
+      if (promoTitle) kineticTitle(promoTitle);
+      const cfg = { left: -8, right: 9 };
+      const st = { trigger: this.querySelector('.promo-images'), start: 'top bottom', end: 'bottom 70%', scrub: true, invalidateOnRefresh: true };
+      const a = gsap.fromTo(this.querySelector('.promo-left'), { yPercent: 60, rotation: () => cfg.left - 6 }, { yPercent: 0, rotation: () => cfg.left, ease: 'none', scrollTrigger: st });
+      const b = gsap.fromTo(this.querySelector('.promo-right'), { yPercent: 80, rotation: () => cfg.right - 5 }, { yPercent: 0, rotation: () => cfg.right, ease: 'none', scrollTrigger: { ...st } });
+
+      // DialKit "Quiz promo" panel
+      onTune('promo', changed((v: any) => {
+        setLabel(this.querySelector('.label'), v.label);
+        setTitle(this.querySelector('.content-title'), [v.title]);
+        setText(this.querySelector('.content p'), v.copy);
+        setButton(this, v.button);
+        setVar(this, '--title-scale', v.titleSize);
+        this.querySelectorAll<HTMLElement>('.promo-left, .promo-right').forEach((el) => (el.style.scale = String(v.productSize)));
+        cfg.left = v.leftTilt;
+        cfg.right = v.rightTilt;
+        a.scrollTrigger?.refresh();
+        b.scrollTrigger?.refresh();
+      }));
+    }
+  }
+  customElements.define('c-product-finder-promo', Promo);
+</script>

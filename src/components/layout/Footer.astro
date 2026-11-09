@@ -1,0 +1,125 @@
+---
+// FOOTER — logo, link columns, socials, giant animated wordmark, legal row
+import Logo from '../ui/Logo.astro';
+import Icon from '../ui/Icon.astro';
+import { footer, brand } from '../../data/content';
+const wordLines = ['Power your', 'everyday.'];
+---
+<footer class="footer flex flex-col gap-y-20 justify-between w-full min-h-screen-mobile xl:min-h-screen bg-white p-margin pb-40 md:pt-40 text-ink">
+  <div class="grid grid-cols-2 md:flex gap-x-gutter md:gap-x-120">
+    <div class="max-md:col-span-full max-md:mb-120 text-ink">
+      <a href="/" aria-label="KYNORA home"><Logo class="w-[14rem] h-auto" /></a>
+    </div>
+    {footer.columns.map((col, i) => (
+      <div class:list={['max-md:col-span-1', i < 2 && 'max-md:mb-45']}>
+        <div class="heading-h7 mb-20">{col.title}</div>
+        <div class="flex flex-col body-l">
+          {col.links.map((l) => <a href="#" class="xl:hover:opacity-60 transition-opacity duration-fast ease-out">{l}</a>)}
+        </div>
+      </div>
+    ))}
+    <div class="max-md:col-span-1 md:flex-1 flex gap-x-8 md:justify-end">
+      {footer.socials.map((s) => (
+        <a href="#" aria-label={s} class="flex-center w-48 h-48 relative bg-cream rounded-full xl:hover:scale-110 transition-transform duration-smooth ease-out">
+          <Icon name={s} class="w-18 h-18" />
+        </a>
+      ))}
+    </div>
+  </div>
+
+  <div class="flex flex-col max-md:mt-120">
+    <c-wordmark class="footer-wordmark block w-full text-orange heading leading-[0.8] select-none" aria-label={footer.wordmark}>
+      {wordLines.map((line) => (
+        <div class="wordmark-line flex justify-between whitespace-nowrap" aria-hidden="true">
+          {[...line].map((c) => (c === ' ' ? <span class="w-[0.18em]" /> : <span class="wordmark-char inline-block origin-bottom">{c}</span>))}
+        </div>
+      ))}
+    </c-wordmark>
+    <hr class="w-full h-px border-0 bg-ink my-40" />
+    <div class="flex max-md:flex-col max-md:items-center md:justify-between gap-x-120 body-s">
+      <div class="max-md:order-2 max-md:mt-20">{brand.copyright}</div>
+      <div class="flex gap-x-30">
+        {footer.legal.map((l) => <a href={l.href} class="xl:hover:opacity-60 transition-opacity duration-fast ease-out">{l.label}</a>)}
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  import { gsap } from '../../lib/scroll';
+  import { onTune, changed } from '../../lib/tune';
+
+  /** Fits each line to full width, then waves the letter heights with scroll. */
+  class Wordmark extends HTMLElement {
+    cfg = { wave: 0.14, freq: 0.7 };
+    chars: HTMLElement[] = [];
+    progress = 0;
+
+    connectedCallback() {
+      this.collect();
+      document.fonts.ready.then(() => this.fit());
+      this.fit();
+      window.addEventListener('resize', () => this.fit());
+
+      const wave = { p: 0 };
+      gsap.to(wave, {
+        p: 1,
+        ease: 'none',
+        onUpdate: () => {
+          this.progress = wave.p;
+          this.render();
+        },
+        scrollTrigger: { trigger: this, start: 'top bottom', end: 'bottom bottom', scrub: true },
+      });
+      this.render();
+
+      // DialKit "Footer" panel
+      onTune('footer', changed((v: any) => {
+        const lines = [v.wordmarkLine1, v.wordmarkLine2].filter((l: string) => l.trim());
+        const current = Array.from(this.querySelectorAll('.wordmark-line')).map((l) => l.textContent?.replace(/\s+/g, ' ').trim());
+        if (lines.join('|') !== current.join('|')) this.build(lines);
+        this.cfg.wave = v.wave;
+        this.cfg.freq = v.waveFrequency;
+        this.style.display = v.showWordmark ? '' : 'none';
+        this.setAttribute('aria-label', lines.join(' '));
+        this.fit();
+        this.render();
+      }));
+    }
+
+    build(lines: string[]) {
+      this.innerHTML = lines
+        .map(
+          (line) =>
+            `<div class="wordmark-line flex justify-between whitespace-nowrap" aria-hidden="true">${[...line]
+              .map((c) => (c === ' ' ? '<span class="w-[0.18em]"> </span>' : `<span class="wordmark-char inline-block origin-bottom">${c}</span>`))
+              .join('')}</div>`,
+        )
+        .join('');
+      this.collect();
+    }
+
+    collect() {
+      this.chars = Array.from(this.querySelectorAll<HTMLElement>('.wordmark-char'));
+    }
+
+    fit() {
+      this.querySelectorAll<HTMLElement>('.wordmark-line').forEach((l) => {
+        l.style.fontSize = '100px';
+        l.style.width = 'max-content';
+        const w = l.offsetWidth;
+        l.style.width = '';
+        if (w) l.style.fontSize = `${(100 * this.clientWidth) / w}px`;
+      });
+    }
+
+    render() {
+      const { wave, freq } = this.cfg;
+      this.chars.forEach((c, i) => {
+        const s = 1 - wave + wave * Math.sin(i * freq + this.progress * Math.PI * 2);
+        c.style.transform = `scaleY(${s.toFixed(3)})`;
+      });
+    }
+  }
+  customElements.define('c-wordmark', Wordmark);
+</script>

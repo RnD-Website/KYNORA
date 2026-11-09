@@ -1,0 +1,32 @@
+---
+// AMBASSADORS — centred intro + interactive Three.js globe with markers
+import Label from '../ui/Label.astro';
+import SplitTitle from '../ui/SplitTitle.astro';
+import Button from '../ui/Button.astro';
+import Globe from '../globe/Globe';
+import { ambassadors } from '../../data/content';
+---
+<section class="ambassadors block bg-cream pt-120 md:pt-200 overflow-hidden">
+  <div class="max-md:mb-50">
+    <div class="content content-medium grid-w w-full text-ink">
+      <div class="col-span-full md:col-start-3 md:col-end-11 xl:col-start-4 xl:col-end-10 flex flex-col items-center max-md:px-margin">
+        <div class="mb-30 md:mb-40"><Label text={ambassadors.label} class="border-ink text-ink" /></div>
+        <SplitTitle lines={ambassadors.title} class="text-center -mx-gutter" tag="h2" manual />
+        <p class="body-s text-center mt-30 md:mt-40 max-w-[64rem]" data-reveal="copy">{ambassadors.copy}</p>
+        <div class="mt-30 md:mt-40" data-reveal="fade">
+          <Button href={ambassadors.button.href} label={ambassadors.button.label} border="border-orange text-orange" panel="bg-orange text-white" filled />
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="globe relative block w-full pb-120 md:pb-200">
+    <Globe client:visible markers={ambassadors.markers as any} />
+  </div>
+</section>
+
+<script>
+  import { kineticTitle } from '../../lib/kinetic';
+  // Kinetic title: arched letters that spring up, flex with scroll, bounce on hover
+  const title = document.querySelector<HTMLElement>('.ambassadors .content-title');
+  if (title) kineticTitle(title);
+</script>

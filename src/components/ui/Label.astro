@@ -1,0 +1,22 @@
+---
+// Outlined pill label above section titles (reference: c-label)
+interface Props {
+  text: string;
+  class?: string;
+  manual?: boolean;
+}
+const { text, class: cls = '', manual = false } = Astro.props;
+const words = text.split(/\s+/);
+---
+<div
+  class:list={['label', cls]}
+  data-reveal="label"
+  data-reveal-manual={manual ? '' : undefined}
+>
+  {words.map((w, i) => (
+    <>
+      <span class="word" aria-hidden="true"><span class="word-inner">{w}</span></span>{i < words.length - 1 && ' '}
+    </>
+  ))}
+  <span class="sr-only">{text}</span>
+</div>
